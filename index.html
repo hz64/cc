@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C C猫表情包 - 最萌的表情包大全</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        /* 分类导航 */
+        .category-nav {
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .category-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .category-btn {
+            padding: 8px 20px;
+            border: none;
+            background: #f0f2f5;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .category-btn:hover {
+            background: #e1e5eb;
+        }
+
+        .category-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* 表情包网格 */
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .emoji-item {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .emoji-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+        }
+
+        .emoji-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .emoji-actions {
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #45a049;
+        }
+
+        .qq-btn {
+            background: #12B7F5;
+            color: white;
+        }
+
+        .qq-btn:hover {
+            background: #0da5e0;
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .modal-img {
+            max-width: 100%;
+            max-height: 70vh;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* 提示消息 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .emoji-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .category-container {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div>
+                <h1>🐱 C C猫表情包</h1>
+                <div class="subtitle">收集全网最可爱的C C猫表情，让聊天更有趣</div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="category-nav">
+        <div class="category-container">
+            <button class="category-btn active" data-category="all">所有图片</button>
+            <button class="category-btn" data-category="wechat">微信表情系列</button>
+            <button class="category-btn" data-category="date">日期命名GIF</button>
+            <button class="category-btn" data-category="newYear">新年快乐系列</button>
+            <button class="category-btn" data-category="future">未来表情系列</button>
+            <button class="category-btn" data-category="midAutumn">中秋快乐</button>
+            <button class="category-btn" data-category="sports">CC观赛篇</button>
+            <button class="category-btn" data-category="olympics">奥运会</button>
+            <button class="category-btn" data-category="summer">暑期特供</button>
+            <button class="category-btn" data-category="zero">0_XXX系列</button>
+            <button class="category-btn" data-category="dynamic">CC动态图系列</button>
+            <button class="category-btn" data-category="expression">CC动态表情系列</button>
+            <button class="category-btn" data-category="other">其他图片</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <div id="emojiContainer" class="emoji-grid">
+            <div class="loading">正在加载表情包...</div>
+        </div>
+    </main>
+
+    <!-- 图片预览模态框 -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">×</button>
+            <img id="modalImage" class="modal-img" src="" alt="">
+        </div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // 表情包数据，按照分类组织
+        const emojiData = {
+            // 微信表情系列 001-081 (只包含实际存在的文件)
+            wechat: Array.from({length: 81}, (_, i) => {
+                const num = i + 1;
+                const numStr = String(num).padStart(3, '0');
+                // 微信表情系列的哈希值映射
+                const hashMap = {
+                    '001': '06CEFFE9', '002': 'B25FB9C7', '003': 'A9CD3F5B', '004': '0BA11ABF',
+                    '005': '80B99B0A', '006': '6EAF540A', '007': 'B08B270D', '008': '5DAA2708',
+                    '009': 'AA346C3E', '010': '7A6668E5', '011': '11610482', '012': '9ECB5C5C',
+                    '013': 'EF664839', '014': 'A11261B1', '015': '54560176', '016': '1D2C012D',
+                    '017': 'B16C77E7', '018': 'BCDD7D24', '019': '2D67FB83', '020': '67E884AE',
+                    '021': '058995C7', '022': 'E249635B', '023': 'F3A63E51', '024': '3C72E6C0',
+                    '025': '0B5D581B', '026': '564651E2', '027': '3CEE52CB', '028': '09A9B180',
+                    '029': '4274D30B', '030': '78D64EE0', '031': '98928E68', '032': 'F0BC5622',
+                    '033': '545AF971', '034': 'C00371C2', '035': 'DAF1E633', '036': '3140AACA',
+                    '037': 'A1EB6CB0', '038': '458161FB', '039': 'E4CCDEBD', '040': '8F946723',
+                    '041': '2185C025', '042': '5D9191E5', '043': '99F151E1', '044': '251A9A05',
+                    '045': '84B42C45', '046': '659AA179', '047': '919BCF9C', '048': '9475F118',
+                    '049': '0FD33523', '050': 'FC2BF1B8', '051': '5D0A980A', '052': '39EF5642',
+                    '053': '938197E1', '054': 'A32A3865', '055': '7EC8B95B', '056': 'D22137C1',
+                    '057': 'BB639752', '058': '207BC9BE', '059': '334FA8CE', '060': '03F1917F',
+                    '061': 'DDE40A04', '062': 'B1D0C2D6', '063': 'D5FCE347', '064': 'E33952F2',
+                    '065': '06586A57', '066': '4DD41EF0', '067': 'FE3B2991', '068': '7BF21C50',
+                    '069': 'B0060DBD', '070': '314638AF', '071': '3F9C8998', '072': '49B1F6AE',
+                    '073': 'D69A95BA', '074': '19E07249', '075': 'A4AAC6FF', '076': '25BAB623',
+                    '077': '88C45864', '078': '24E02E83', '079': 'CF656146', '080': 'A67785AB',
+                    '081': '1CD13A2F'
+                };
+                const hash = hashMap[numStr] || 'DEFAULT_HASH';
+                return {
+                    id: num,
+                    name: `${numStr}_微信表情系列`,
+                    src: `img/${numStr}_微信表情系列_${hash}.gif`,
+                    category: 'wechat'
+                };
+            }),
+            
+            // 日期表情系列 (只包含实际存在的文件)
+            date: [
+                {id: 188, name: '188_2016-10-05', src: 'img/188_2016-10-05_78BC294E.gif', category: 'date'}
+            ],
+            
+            // 提前祝大家新年快乐na__系列 (145-167)
+            newYear: Array.from({length: 23}, (_, i) => {
+                const num = 145 + i;
+                // 新年快乐系列的哈希值映射
+                const hashMap = {
+                    '145': '3AAF367C', '146': 'E3D05B0A', '147': '8D685109', '148': '5ACFCF37',
+                    '149': 'E24AA8A8', '150': '2E64BC1D', '151': '4E5AAD6E', '152': 'F8CF631F',
+                    '153': 'E464D97A', '154': 'DC24CD74', '155': 'B70EB0C9', '156': '754AABC3',
+                    '157': 'ECC708E6', '158': '0C2ECCD1', '159': 'A58554BA', '160': '285983CF',
+                    '161': '9DBC2170', '162': '0A7E4DD9', '163': '56813A82', '164': 'B5287E1E',
+                    '165': 'C58B1855', '166': 'CA5F6317', '167': 'A57563F2'
+                };
+                const hash = hashMap[String(num)] || 'DEFAULT_HASH';
+                return {
+                    id: num,
+                    name: `${num}_提前祝大家新年快乐na__`,
+                    src: `img/${num}_提前祝大家新年快乐na__${hash}.gif`,
+                    category: 'newYear'
+                };
+            }),
+            
+            // CC未来表情系列 (189-208)
+            future: Array.from({length: 20}, (_, i) => {
+                const num = 189 + i;
+                // 未来表情系列的哈希值映射
+                const hashMap = {
+                    189: '2FFE6866', 190: 'B65F51E9', 191: 'A04723E8', 192: 'B6BE70F5',
+                    193: '7A2D9BF1', 194: '02A7E48F', 195: '2E44C5DF', 196: 'B2BD6BE6',
+                    197: 'F2FFCB45', 198: '2BCAB934', 199: 'D6B4293E', 200: '30C03A8A',
+                    201: '0E693A31', 202: '424CAFA7', 203: '253AADAB', 204: '3EEBF17D',
+                    205: '4887164E', 206: '37B48CF8', 207: '08AB4D4E', 208: '704B32B2'
+                };
+                const hash = hashMap[num];
+                return {
+                    id: num,
+                    name: `${num}_CC未来表情系列`,
+                    src: `img/${num}_CC未来表情系列_${hash}.gif`,
+                    category: 'future'
+                };
+            }),
+            
+            // 中秋快乐 (209-215)
+            midAutumn: [
+                {id: 209, name: '209_中秋快乐', src: 'img/209_中秋快乐_37D0A5B8.gif', category: 'midAutumn'},
+                {id: 210, name: '210_中秋快乐', src: 'img/210_中秋快乐_B9258003.gif', category: 'midAutumn'},
+                {id: 211, name: '211_中秋快乐', src: 'img/211_中秋快乐_C8F5082A.gif', category: 'midAutumn'},
+                {id: 212, name: '212_中秋快乐', src: 'img/212_中秋快乐_AAFE14BD.gif', category: 'midAutumn'},
+                {id: 213, name: '213_中秋快乐', src: 'img/213_中秋快乐_79796D64.gif', category: 'midAutumn'},
+                {id: 214, name: '214_中秋快乐', src: 'img/214_中秋快乐_99C4B24B.gif', category: 'midAutumn'},
+                {id: 215, name: '215_中秋快乐', src: 'img/215_中秋快乐_4EDD3CB4.gif', category: 'midAutumn'}
+            ],
+            
+            // CC观赛篇 (216-220)
+            sports: [
+                {id: 216, name: '216_CC观赛篇', src: 'img/216_CC观赛篇_1D3486FA.gif', category: 'sports'},
+                {id: 217, name: '217_CC观赛篇', src: 'img/217_CC观赛篇_DEF874FF.gif', category: 'sports'},
+                {id: 218, name: '218_CC观赛篇', src: 'img/218_CC观赛篇_3A23F8CF.gif', category: 'sports'},
+                {id: 219, name: '219_CC观赛篇', src: 'img/219_CC观赛篇_FD7BC58F.gif', category: 'sports'},
+                {id: 220, name: '220_CC观赛篇', src: 'img/220_CC观赛篇_3108551C.gif', category: 'sports'}
+            ],
+            
+            // 奥运会 (221-228)
+            olympics: [
+                {id: 221, name: '221_奥运会', src: 'img/221_奥运会_D7990A98.gif', category: 'olympics'},
+                {id: 222, name: '222_奥运会', src: 'img/222_奥运会_DED52F5B.gif', category: 'olympics'},
+                {id: 223, name: '223_奥运会', src: 'img/223_奥运会_BBFF65A3.gif', category: 'olympics'},
+                {id: 224, name: '224_奥运会', src: 'img/224_奥运会_3D7EC2A1.gif', category: 'olympics'},
+                {id: 225, name: '225_奥运会', src: 'img/225_奥运会_F36E8F4D.gif', category: 'olympics'},
+                {id: 226, name: '226_奥运会', src: 'img/226_奥运会_F43E6559.gif', category: 'olympics'},
+                {id: 227, name: '227_奥运会', src: 'img/227_奥运会_BC213755.gif', category: 'olympics'},
+                {id: 228, name: '228_奥运会', src: 'img/228_奥运会_D0564366.gif', category: 'olympics'}
+            ],
+            
+            // 暑期特供 (229-239)
+            summer: [
+                {id: 229, name: '229_暑期特供', src: 'img/229_暑期特供_2A9FEE79.gif', category: 'summer'},
+                {id: 230, name: '230_暑期特供', src: 'img/230_暑期特供_375AC117.gif', category: 'summer'},
+                {id: 231, name: '231_暑期特供', src: 'img/231_暑期特供_186E778B.gif', category: 'summer'},
+                {id: 232, name: '232_暑期特供', src: 'img/232_暑期特供_660A16AB.gif', category: 'summer'},
+                {id: 233, name: '233_暑期特供', src: 'img/233_暑期特供_47D5C072.gif', category: 'summer'},
+                {id: 234, name: '234_暑期特供', src: 'img/234_暑期特供_2906A23A.gif', category: 'summer'},
+                {id: 235, name: '235_暑期特供', src: 'img/235_暑期特供_5B1090E2.gif', category: 'summer'},
+                {id: 236, name: '236_暑期特供', src: 'img/236_暑期特供_8950AD64.gif', category: 'summer'},
+                {id: 237, name: '237_暑期特供', src: 'img/237_暑期特供_106E2543.gif', category: 'summer'},
+                {id: 238, name: '238_暑期特供', src: 'img/238_暑期特供_64DC5180.gif', category: 'summer'},
+                {id: 239, name: '239_暑期特供', src: 'img/239_暑期特供_1FA50FEF.gif', category: 'summer'}
+            ],
+            
+            // 0_XXX系列 (240-244)
+            zero: [
+                {id: 240, name: '240_0_(1)', src: 'img/240_0_(1)_A0F3AC4D.gif', category: 'zero'},
+                {id: 241, name: '241_0_(2)', src: 'img/241_0_(2)_BA5782F7.gif', category: 'zero'},
+                {id: 242, name: '242_0_(3)', src: 'img/242_0_(3)_0224B330.gif', category: 'zero'},
+                {id: 243, name: '243_0_(4)', src: 'img/243_0_(4)_9FCEF2F6.gif', category: 'zero'},
+                {id: 244, name: '244_0_', src: 'img/244_0_256798AE.gif', category: 'zero'}
+            ],
+            
+            // CC动态图系列 (245-322)
+            dynamic: Array.from({length: 78}, (_, i) => {
+                const num = 245 + i;
+                // 动态图系列的哈希值映射
+                const hashMap = {
+                    '245': 'BA02C8E7', '246': '00CF9799', '247': 'A4EC51DE', '248': '8A003C06', '249': 'F897A599',
+                    '250': 'C0502D25', '251': 'A58ADB37', '252': '81B31BBA', '253': '5FA2CC9C', '254': '2056AA55',
+                    '255': '6DA70444', '256': '9298B18D', '257': 'A6FD019A', '258': '376E5246', '259': '6FBCA9AE',
+                    '260': '0E28D2FD', '261': 'E14F1131', '262': '9E2C3845', '263': 'B1E0D7EF', '264': '08F10BF9',
+                    '265': 'D1D863D6', '266': '8767EF26', '267': '5EC804CD', '268': '30289FE8', '269': '089C0DB3',
+                    '270': 'E318EE87', '271': '5DC1A929', '272': 'A2E29B25', '273': '485DEBC0', '274': '8AD0A263',
+                    '275': '062AA356', '276': '7B8F07A2', '277': '7347DAB9', '278': 'F96AB9A7', '279': 'F3A9FE30',
+                    '280': 'EA6325CE', '281': '982AE1F7', '282': '0775FEA6', '283': 'E3C3479C', '284': 'A382E492',
+                    '285': '27A677E5', '286': '5A8C6C2D', '287': '671A77F1', '288': '9F0F5A56', '289': 'B97E0AFF',
+                    '290': 'E4607B7E', '291': '592179A4', '292': '59C958FF', '293': '505FA679', '294': '01C11F31',
+                    '295': '05E52913', '296': '696DC356', '297': '18F08120', '298': '5360663A', '299': '54105E08',
+                    '300': 'ABE34EF0', '301': '35216293', '302': '143299FC', '303': 'ECBFCFA3', '304': '64C6EF23',
+                    '305': 'C4334876', '306': 'F9C5E264', '307': 'DA0C66A0', '308': '88E253DA', '309': 'BA20C793',
+                    '310': '47FDDD89', '311': 'D1CA7307', '312': '665E09BB', '313': '070E296A', '314': 'AEFA7C6E',
+                    '315': '1BC9B086', '316': '5612010E', '317': '45446D8A', '318': 'D26890A4', '319': '21DF6A24',
+                    '320': '25D625D7', '321': 'EE2035A0', '322': '78D1AFAC'
+                };
+                const hash = hashMap[String(num)] || 'DEFAULT_HASH';
+                return {
+                    id: num,
+                    name: `${num}_CC动态图`,
+                    src: `img/${num}_CC动态图_${hash}.gif`,
+                    category: 'dynamic'
+                };
+            }),
+            // CC动态表情系列 (暂时只包含实际存在的文件)
+            expression: [],
+            
+            // 其他文件
+            other: [
+                {id: 999, name: '05AF02A1.jpeg', src: 'img/05AF02A1.jpeg', category: 'other'}
+            ]
+        };
+        
+        // 计算all分类，包含所有图片
+        emojiData.all = [];
+        Object.values(emojiData).forEach(category => {
+            emojiData.all = emojiData.all.concat(category);
+        });
+        
+        let currentCategory = 'all';
+        
+        // 初始化页面
+        function initPage() {
+            loadEmoji('all');
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化加载所有图片
+            initPage();
+            
+            // 绑定分类按钮事件
+            bindCategoryEvents();
+        });
+
+        // 绑定分类按钮事件
+        function bindCategoryEvents() {
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategory = this.dataset.category;
+                    loadEmoji(currentCategory);
+                });
+            });
+        }
+        
+        // 加载指定分类的表情包
+        function loadEmoji(category) {
+            currentCategory = category;
+            renderEmojis();
+        }
+
+        // 渲染表情包
+        function renderEmojis() {
+            const container = document.getElementById('emojiContainer');
+            let emojis = [];
+
+            if (currentCategory === 'all') {
+                // 显示所有表情包
+                emojis = Object.values(emojiData).flat();
+            } else {
+                // 显示特定分类
+                emojis = emojiData[currentCategory] || [];
+            }
+
+            container.innerHTML = emojis.map(emoji => `
+                <div class="emoji-item" onclick="previewImage('${emoji.src}', '${emoji.name}')">
+                    <img src="${emoji.src}" alt="${emoji.name}" class="emoji-img" loading="lazy">
+                    <div class="emoji-actions">
+                        <button class="action-btn download-btn" onclick="downloadEmoji(event, '${emoji.src}', '${emoji.name}')">
+                            <span>⬇</span> 下载
+                        </button>
+                        <button class="action-btn qq-btn" onclick="sendToQQ(event, '${emoji.src}', '${emoji.name}')">
+                            <span>💬</span> 发送
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 预览图片
+        function previewImage(src, name) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = src;
+            modalImg.alt = name;
+            modal.style.display = 'flex';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // 点击模态框背景关闭
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // 下载表情包
+        function downloadEmoji(event, src, name) {
+            event.stopPropagation();
+            
+            // 创建临时链接下载
+            fetch(src)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${name}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                    showToast('表情包下载成功！');
+                })
+                .catch(() => {
+                    showToast('下载失败，请重试');
+                });
+        }
+
+        // 发送到QQ好友
+        function sendToQQ(event, src, name) {
+            event.stopPropagation();
+            
+            // 由于浏览器安全限制，不能直接发送到QQ
+            // 这里提供几种替代方案
+            
+            // 方案1：复制图片链接
+            const textArea = document.createElement('textarea');
+            textArea.value = src;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            showToast('图片链接已复制，可以粘贴到QQ发送');
+            
+            // 方案2：打开QQ分享链接（需要用户手动操作）
+            setTimeout(() => {
+                if (confirm('是否打开QQ进行分享？')) {
+                    // 尝试打开QQ（这取决于用户的设备）
+                    window.location.href = 'mqqapi://forward/url?url_prefix=' + encodeURIComponent(src);
+                }
+            }, 1000);
+        }
+
+        // 显示提示消息
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 键盘事件
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
